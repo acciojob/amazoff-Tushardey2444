@@ -23,6 +23,9 @@ public class OrderController {
 
     @PostMapping("/add-order")
     public ResponseEntity<String> addOrder(@RequestBody Order order){
+        if(order==null){
+            return null;
+        }
         String result=orderService.addOrderService(order);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
