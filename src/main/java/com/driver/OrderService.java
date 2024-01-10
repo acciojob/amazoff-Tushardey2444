@@ -1,6 +1,5 @@
 package com.driver;
 
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,97 +7,76 @@ import java.util.List;
 
 @Service
 public class OrderService {
-
     OrderRepository orderRepository=new OrderRepository();
 
-
-    public void addOrder(Order order){
-        orderRepository.addOrder(order);
+    public String addOrderService(Order order){
+        String id=order.getId();
+        return orderRepository.addOrderToDb(id,order);
     }
-
-    public void addPartner(String partnerId){
-        orderRepository.addPartner(partnerId);
+    public String addPartnerService(String partnerId){
+        DeliveryPartner deliveryPartner=new DeliveryPartner(partnerId);
+        return orderRepository.addPartnerToDb(partnerId,deliveryPartner);
     }
-
-
-    public void addOrderPartnerPair(String orderId, String partnerId){
-        orderRepository.addOrderPartnerPair(orderId, partnerId);
+    public Order getOrderByIdService(String orderId){
+        return orderRepository.getOrderByIdFromDb(orderId);
     }
-
-    public Order getOrderById(String orderId){
-        Order order = orderRepository.getOrderById(orderId);
-        return order;
+    public DeliveryPartner getPartnerByIdService(String partnerId){
+        return orderRepository.getPartnerByIdFromDb(partnerId);
     }
-
-    public DeliveryPartner getPartnerById(String partnerId){
-        DeliveryPartner partner = orderRepository.getPartnerById(partnerId);
-        return partner;
+    public Integer getOrderCountByPartnerIdService(String partnerId){
+        DeliveryPartner deliveryPartner=orderRepository.getPartnerByIdFromDb(partnerId);
+        return deliveryPartner.getNumberOfOrders();
     }
-
-    public int getOrderCountByPartnerId(String partnerId){
-        int orderCount = orderRepository.getOrderCountByPartnerId(partnerId);
-        return orderCount;
+    public String addOrderPartnerPairService(String orderId,String partnerId){
+        String result=orderRepository.addOrderPartnerPairToDb(orderId,partnerId);
+        DeliveryPartner deliveryPartner=orderRepository.getPartnerByIdFromDb(partnerId);
+        deliveryPartner.setNumberOfOrders(deliveryPartner.getNumberOfOrders()+1);
+        return result;
     }
-
-    public List<String> getOrdersByPartnerId(String partnerId){
-        List<String> list = orderRepository.getOrdersByPartnerId(partnerId);
-        return list;
-
+    public List<String> getOrdersByPartnerIdService(String partnerId){
+        return orderRepository.getOrdersByPartnerIdFromDb(partnerId);
     }
-
-    public List<String> getAllOrders(){
-        List<String> list = orderRepository.getAllOrders();
-        return list;
+    public List<String> getAllOrdersService(){
+        return orderRepository.getAllOrdersFromDb();
     }
-
-    public int getCountOfUnassignedOrders(){
-        int count = orderRepository.getCountOfUnassignedOrders();
+    public Integer getCountOfUnassignedOrdersService(){
+        return orderRepository.getCountOfUnassignedOrdersFromDb();
+    }
+    public Integer getOrdersLeftAfterGivenTimeByPartnerIdService(String time,String partnerId){
+        List<String> orders=orderRepository.getOrdersByPartnerIdFromDb(partnerId);
+        String[] timeArr=time.split(":");
+        int hour=Integer.parseInt(timeArr[0]);
+        int min=Integer.parseInt(timeArr[1]);
+        int givenTime=(hour*60)+min;
+        int count=0;
+        for(String orderId:orders){
+            Order order=orderRepository.getOrderByIdFromDb(orderId);
+            if(order.getDeliveryTime()>givenTime){
+                count++;
+            }
+        }
         return count;
     }
-
-    public int getOrdersLeftAfterGivenTimeByPartnerId(String time, String partnerId){
-//        String s1 = String.valueOf(time.charAt(0) + time.charAt(1));
-//        String s2 = String.valueOf(time.charAt(3) + time.charAt(4));
-//        int hh = Integer.valueOf(s1);
-//        int mm = Integer.valueOf(s2);
-
-        String arr[] = time.split(":");
-        int hh = Integer.parseInt(arr[0]);
-        int mm = Integer.parseInt(arr[1]);
-
-        int timeInt = (hh*60)+mm;
-
-        int count = orderRepository.getOrdersLeftAfterGivenTimeByPartnerId(timeInt, partnerId);
-
-        return count;
-    }
-
-    public String getLastDeliveryTimeByPartnerId(String partnerId){
-
-        int timeInt = orderRepository.getLastDeliveryTimeByPartnerId(partnerId);
-        int hh = timeInt/60;
-        int mm = timeInt%60;
-        String HH = String.valueOf(hh);
-        if(HH.length()==1){
-            HH = '0' + HH;
+    public String getLastDeliveryTimeByPartnerIdService(String partnerId){
+        List<String> orders=orderRepository.getOrdersByPartnerIdFromDb(partnerId);
+        int lastOrderDeliveryTime=0;
+        for(String orderId:orders){
+            Order order=orderRepository.getOrderByIdFromDb(orderId);
+            lastOrderDeliveryTime=Math.max(lastOrderDeliveryTime,order.getDeliveryTime());
         }
-        String MM = String.valueOf(mm);
-        if(MM.length()==1){
-            MM = '0'+MM;
+        String hour= String.valueOf(lastOrderDeliveryTime/60);
+        String min= String.valueOf(lastOrderDeliveryTime%60);
+        return (hour.length()==1?("0"+hour):hour)+":"+(min.length()==1?("0"+min):min);
+    }
+    public String deletePartnerByIdService(String partnerId){
+        List<String> orders=orderRepository.getOrdersByPartnerIdFromDb(partnerId);
+
+        for(String orderId:orders){
+            orderRepository.setUnassignedOrderDb(orderId);
         }
-
-        String time = HH + ":" + MM;
-        return time;
+        return orderRepository.deletePartnerByIdFromDb(partnerId);
     }
-
-
-    public void deletePartnerById(String partnerId){
-
-        orderRepository.deletePartnerById(partnerId);
-    }
-
-    public void deleteOrderById(String orderId){
-
-        orderRepository.deleteOrderById(orderId);
+    public String deleteOrderByIdService(String orderId){
+        return orderRepository.deleteOrderByIdFromDb(orderId);
     }
 }
