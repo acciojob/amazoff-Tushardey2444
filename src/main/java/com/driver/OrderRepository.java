@@ -26,10 +26,10 @@ public class OrderRepository {
         return "New delivery partner added successfully";
     }
     public Order getOrderByIdFromDb(String orderId){
-        return orderDB.getOrDefault(orderId,null);
+        return orderDB.get(orderId);
     }
     public DeliveryPartner getPartnerByIdFromDb(String partnerId){
-        return partnerDB.getOrDefault(partnerId,null);
+        return partnerDB.get(partnerId);
     }
     public String addOrderPartnerPairToDb(String orderId,String partnerId){
         if(!partnerToOrderDb.containsKey(partnerId)){
