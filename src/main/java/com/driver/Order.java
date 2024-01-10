@@ -12,7 +12,7 @@ public class Order {
         this.deliveryTime=delivery(deliveryTime);
         // The deliveryTime has to converted from string to int and then stored in the attribute
         //deliveryTime  = HH*60 + MM
-
+        this.id=id;
     }
 
     public String getId() {
