@@ -50,14 +50,21 @@ public class OrderRepository {
     }
     public String deletePartnerByIdFromDb(String partnerId){
         partnerDB.remove(partnerId);
+        partnerToOrderDb.remove(partnerId);
         return partnerId + " removed successfully";
     }
     public String deleteOrderByIdFromDb(String orderId){
         if(unassignedOrderDb.contains(orderId)){
             unassignedOrderDb.remove(orderId);
         }else{
-            for(List<String> orders:partnerToOrderDb.values()){
-                orders.remove(orderId);
+            for(String partnerId:partnerToOrderDb.keySet()){
+                List<String> orders=partnerToOrderDb.get(partnerId);
+                if(orders.contains(orderId)){
+                    orders.remove(orderId);
+                    DeliveryPartner deliveryPartner=partnerDB.get(partnerId);
+                    deliveryPartner.setNumberOfOrders(deliveryPartner.getNumberOfOrders()-1);
+                    break;
+                }
             }
         }
         orderDB.remove(orderId);
