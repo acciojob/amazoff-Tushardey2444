@@ -7,12 +7,12 @@ import java.util.*;
 
 @Repository
 public class OrderRepository {
-    private final HashMap<String,Order> orderDB=new HashMap<>();
-    private final HashMap<String,DeliveryPartner> partnerDB=new HashMap<>();
+     HashMap<String,Order> orderDB=new HashMap<>();
+     HashMap<String,DeliveryPartner> partnerDB=new HashMap<>();
 
-    private final HashMap<String,List<String>> partnerToOrderDb=new HashMap<>();
+     HashMap<String,List<String>> partnerToOrderDb=new HashMap<>();
 
-    private final HashSet<String> unassignedOrderDb=new HashSet<>();
+     HashSet<String> unassignedOrderDb=new HashSet<>();
     public String addOrderToDb(String id,Order order){
         orderDB.put(id,order);
         unassignedOrderDb.add(id);
